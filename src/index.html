@@ -1,0 +1,133 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>GitHub Mirror</title>
+<meta name="description" content="GitHub リポジトリを軽量に閲覧するクライアント。検索・概要・ファイルツリー・ソース表示に対応。">
+<link rel="icon" href="./assets/favicon.ico" sizes="any">
+<link rel="apple-touch-icon" href="./assets/icon.png">
+<link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+<header class="topbar">
+  <a class="brand" href="#/" aria-label="GitHub Mirror ホーム">
+    <img src="./assets/icon.png" alt="" width="28" height="28">
+    <span>GitHub Mirror</span>
+  </a>
+
+  <form class="search" id="search-form" role="search">
+    <svg class="search-icon" viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path fill="currentColor" d="M10.68 11.74a6 6 0 0 1-7.922-8.982 6 6 0 0 1 8.982 7.922l3.04 3.04a.749.749 0 0 1-.326 1.275.749.749 0 0 1-.734-.215ZM11.5 7a4.499 4.499 0 1 0-8.997 0A4.499 4.499 0 0 0 11.5 7Z"/></svg>
+    <input id="search-input" type="search" name="q" placeholder="リポジトリ検索 / owner/repo を入力" autocomplete="off" spellcheck="false" aria-label="リポジトリ検索">
+    <kbd>/</kbd>
+  </form>
+
+  <div class="topbar-actions">
+    <button class="rate-badge" id="rate-badge" type="button" title="API レート制限 / トークン設定">
+      <span class="dot"></span><span id="rate-text">—</span>
+    </button>
+    <button class="icon-btn" id="endpoint-btn" type="button" title="接続設定（ミラー / 非公式 API）" aria-label="接続設定">
+      <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path fill="currentColor" d="M8 0a8.2 8.2 0 0 1 .701.031C9.444.095 9.99.645 10.16 1.29l.288 1.107c.018.066.079.158.212.224.231.114.454.243.668.386.123.082.233.09.299.071l1.103-.303c.644-.176 1.392.021 1.82.63.27.385.506.792.704 1.218.315.675.111 1.422-.364 1.891l-.814.806c-.049.048-.098.147-.088.294.016.257.016.515 0 .772-.01.147.038.246.088.294l.814.806c.475.469.679 1.216.364 1.891a7.977 7.977 0 0 1-.704 1.217c-.428.61-1.176.807-1.82.63l-1.102-.302c-.067-.019-.177-.011-.3.071a5.909 5.909 0 0 1-.668.386c-.133.066-.194.158-.211.224l-.29 1.106c-.168.646-.715 1.196-1.458 1.26a8.006 8.006 0 0 1-1.402 0c-.743-.064-1.289-.614-1.458-1.26l-.289-1.106c-.018-.066-.079-.158-.212-.224a5.738 5.738 0 0 1-.668-.386c-.123-.082-.233-.09-.299-.071l-1.103.303c-.644.176-1.392-.021-1.82-.63a8.12 8.12 0 0 1-.704-1.218c-.315-.675-.111-1.422.363-1.891l.815-.806c.05-.048.098-.147.088-.294a6.214 6.214 0 0 1 0-.772c.01-.147-.038-.246-.088-.294l-.815-.806C.635 6.045.431 5.298.746 4.623a7.92 7.92 0 0 1 .704-1.217c.428-.61 1.176-.807 1.82-.63l1.102.302c.067.019.177.011.3-.071.214-.143.437-.272.668-.386.133-.066.194-.158.211-.224l.29-1.106C6.009.645 6.556.095 7.299.03 7.53.01 7.764 0 8 0Zm-.571 1.525c-.036.003-.108.036-.137.146l-.289 1.105c-.147.561-.549.967-.998 1.189-.173.086-.34.183-.5.29-.417.278-.97.423-1.529.27l-1.103-.303c-.109-.03-.175.016-.195.045-.22.312-.412.644-.573.99-.014.031-.021.11.059.19l.815.806c.411.406.562.957.53 1.456a4.709 4.709 0 0 0 0 .582c.032.499-.119 1.05-.53 1.456l-.815.806c-.081.08-.073.159-.059.19.162.346.353.677.573.989.02.03.085.076.195.046l1.102-.303c.56-.153 1.113-.008 1.53.27.161.107.328.204.501.29.447.222.85.629.997 1.189l.289 1.105c.029.109.101.143.137.146a6.6 6.6 0 0 0 1.142 0c.036-.003.108-.036.137-.146l.289-1.105c.147-.561.549-.967.998-1.189.173-.086.34-.183.5-.29.417-.278.97-.423 1.529-.27l1.103.303c.109.029.175-.016.195-.045.22-.313.411-.644.573-.99.014-.031.021-.11-.059-.19l-.815-.806c-.411-.406-.562-.957-.53-1.456a4.709 4.709 0 0 0 0-.582c-.032-.499.119-1.05.53-1.456l.815-.806c.081-.08.073-.159.059-.19a6.464 6.464 0 0 0-.573-.989c-.02-.03-.085-.076-.195-.046l-1.102.303c-.56.153-1.113.008-1.53-.27a4.44 4.44 0 0 0-.501-.29c-.447-.222-.85-.629-.997-1.189l-.289-1.105c-.029-.11-.101-.143-.137-.146a6.6 6.6 0 0 0-1.142 0ZM11 8a3 3 0 1 1-6 0 3 3 0 0 1 6 0ZM9.5 8a1.5 1.5 0 1 0-3.001.001A1.5 1.5 0 0 0 9.5 8Z"/></svg>
+    </button>
+    <button class="icon-btn" id="token-btn" type="button" title="アクセストークン設定" aria-label="アクセストークン設定">
+      <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path fill="currentColor" d="M11.236 2.066a3.75 3.75 0 0 0-5.303 0L4.4 3.6a.75.75 0 0 0 1.06 1.06l1.533-1.533a2.25 2.25 0 0 1 3.182 3.182l-1.533 1.533a.75.75 0 1 0 1.06 1.06l1.534-1.533a3.75 3.75 0 0 0 0-5.303ZM7.47 5.28a.75.75 0 0 0-1.06-1.06L4.876 5.753a3.75 3.75 0 0 0 0 5.303 3.75 3.75 0 0 0 5.303 0l1.533-1.533a.75.75 0 1 0-1.06-1.06L9.12 9.996a2.25 2.25 0 0 1-3.182-3.182L7.47 5.28Z"/></svg>
+    </button>
+  </div>
+</header>
+
+<main id="app" tabindex="-1"></main>
+
+<footer class="footer">
+  <span>データ: GitHub REST API（ミラー設定可） / jsDelivr</span>
+  <span>ファイルは CDN → Raw の順で取得（接続設定で変更可）</span>
+</footer>
+
+<dialog id="token-dialog" class="dialog">
+  <form method="dialog" class="dialog-body" id="token-form">
+    <h2>アクセストークン</h2>
+    <p class="muted">
+      未設定だと GitHub API は <strong>60 リクエスト/時</strong>（検索は 10/分）です。
+      読み取り専用の fine-grained PAT を設定すると <strong>5,000/時</strong> に増えます。
+      トークンはこのブラウザの localStorage にのみ保存され、公式 GitHub API 以外には送信しません
+      （接続設定で明示的に許可した場合を除く）。
+    </p>
+    <label class="field">
+      <span>Personal Access Token</span>
+      <input id="token-input" type="password" placeholder="github_pat_..." autocomplete="off" spellcheck="false">
+    </label>
+    <p class="muted small" id="token-status"></p>
+    <div class="dialog-actions">
+      <button type="button" class="btn ghost" id="token-clear">削除</button>
+      <button type="button" class="btn ghost" id="token-cancel">閉じる</button>
+      <button type="submit" class="btn primary">保存</button>
+    </div>
+  </form>
+</dialog>
+
+<dialog id="endpoint-dialog" class="dialog wide">
+  <form method="dialog" class="dialog-body" id="endpoint-form">
+    <h2>接続設定</h2>
+    <p class="muted small">
+      github.com に接続できない環境では、ミラー API や別 CDN を指定してください。
+      設定はこのブラウザにのみ保存されます。
+    </p>
+
+    <label class="field">
+      <span>モード</span>
+      <select id="ep-mode">
+        <option value="github">GitHub API（公式 / ミラー）</option>
+        <option value="ungh">ungh（非公式 API）</option>
+      </select>
+    </label>
+
+    <label class="field">
+      <span>API ベース URL</span>
+      <input id="ep-api" list="ep-api-presets" spellcheck="false" autocomplete="off">
+      <datalist id="ep-api-presets"></datalist>
+    </label>
+
+    <label class="field">
+      <span>CDN テンプレート（ファイル本文）</span>
+      <input id="ep-cdn" list="ep-cdn-presets" spellcheck="false" autocomplete="off">
+      <datalist id="ep-cdn-presets"></datalist>
+    </label>
+
+    <label class="field">
+      <span>ファイル一覧 API テンプレート</span>
+      <input id="ep-data" list="ep-data-presets" spellcheck="false" autocomplete="off">
+      <datalist id="ep-data-presets"></datalist>
+    </label>
+
+    <label class="field">
+      <span>Raw テンプレート（CDN 失敗時のフォールバック）</span>
+      <input id="ep-raw" list="ep-raw-presets" spellcheck="false" autocomplete="off">
+      <datalist id="ep-raw-presets"></datalist>
+    </label>
+
+    <label class="field" id="ep-ungh-field">
+      <span>ungh ベース URL</span>
+      <input id="ep-ungh" spellcheck="false" autocomplete="off">
+    </label>
+
+    <label class="check"><input type="checkbox" id="ep-fallback"> 失敗時に自動でミラーへフォールバック</label>
+    <label class="check"><input type="checkbox" id="ep-token-mirror"> ミラーにもアクセストークンを送信（非推奨）</label>
+
+    <p class="muted small">
+      プレースホルダ: <code>{owner}</code> <code>{repo}</code> <code>{ref}</code>
+      <code>{refEncoded}</code> <code>{path}</code> <code>{pathEncoded}</code>
+    </p>
+
+    <div id="ep-test-result" class="test-result"></div>
+
+    <div class="dialog-actions">
+      <button type="button" class="btn ghost" id="ep-reset">初期化</button>
+      <button type="button" class="btn ghost" id="ep-test">接続テスト</button>
+      <button type="button" class="btn ghost" id="ep-cancel">閉じる</button>
+      <button type="submit" class="btn primary">保存</button>
+    </div>
+  </form>
+</dialog>
+
+<script type="module" src="./assets/app.min.js"></script>
+</body>
+</html>
